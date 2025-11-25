@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAK Computer Architecture | Systems Analysis & Consulting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* =========================================
+           1. CORE VARIABLES & RESET
+           ========================================= */
+        :root {
+            /* Palette: Organic Tech */
+            --primary-green: #1B4D3E; /* Deep Oak Green */
+            --secondary-green: #3A6B5C; /* Muted Leaf */
+            --tech-grey: #2C3E50; /* Hardware Grey */
+            --accent-gold: #C5A059; /* Wood/Gold Accent */
+            --bg-light: #F7F9F8;
+            --bg-white: #FFFFFF;
+            --text-dark: #111827;
+            --text-muted: #4B5563;
+            
+            /* Typography */
+            --font-display: 'Playfair Display', serif;
+            --font-body: 'DM Sans', sans-serif;
+            
+            /* Spacing & Layout */
+            --section-padding: 100px 0;
+            --container-width: 1200px;
+            --border-radius: 4px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: var(--font-display);
+            color: var(--primary-green);
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* =========================================
+           2. UTILITIES
+           ========================================= */
+        .container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 25px;
+        }
+
+        .text-center { text-align: center; }
+
+        .section-header {
+            margin-bottom: 60px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .subtitle {
+            font-family: var(--font-body);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            font-weight: 700;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 16px 36px;
+            background-color: var(--primary-green);
+            color: var(--bg-white);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border: 2px solid var(--primary-green);
+            cursor: pointer;
+            border-radius: var(--border-radius);
+        }
+
+        .btn:hover {
+            background-color: transparent;
+            color: var(--primary-green);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--bg-white);
+            color: var(--bg-white);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--bg-white);
+            color: var(--primary-green);
+        }
+
+        /* =========================================
+           3. HEADER & NAV
+           ========================================= */
+        header {
+            background-color: var(--bg-white);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 90px;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--accent-gold);
+        }
+
+        nav ul {
+            display: flex;
+            gap: 40px;
+        }
+
+        nav a {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--tech-grey);
+        }
+
+        nav a:hover {
+            color: var(--accent-gold);
+        }
+
+        /* =========================================
+           4. HERO SECTION
+           ========================================= */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(27, 77, 62, 0.85), rgba(44, 62, 80, 0.8)), url('https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
+            display: flex;
+            align-items: center;
+            color: var(--bg-white);
+            padding-top: 90px;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            color: var(--bg-white);
+            font-size: 4rem;
+            margin-bottom: 25px;
+        }
+
+        .hero p {
+            color: #e0e0e0;
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            max-width: 650px;
+            border-left: 4px solid var(--accent-gold);
+            padding-left: 20px;
+        }
+
+        /* =========================================
+           5. ABOUT US (The Foundation)
+           ========================================= */
+        .about {
+            padding: var(--section-padding);
+            background-color: var(--bg-white);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 70px;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-size: 2.8rem;
+        }
+
+        .about-img {
+            position: relative;
+        }
+
+        .about-img img {
+            border-radius: var(--border-radius);
+            box-shadow: 20px 20px 0 var(--bg-light), 20px 20px 0 2px var(--primary-green);
+        }
+
+        /* =========================================
+           6. SERVICES (System Modules)
+           ========================================= */
+        .services {
+            padding: var(--section-padding);
+            background-color: var(--bg-light);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .service-card {
+            background: var(--bg-white);
+            padding: 50px 35px;
+            border-top: 4px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-top: 4px solid var(--accent-gold);
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            margin-bottom: 25px;
+            display: block;
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        /* =========================================
+           7. ADVANTAGES (Core Stability)
+           ========================================= */
+        .advantages {
+            padding: var(--section-padding);
+            background-color: var(--primary-green);
+            color: var(--bg-white);
+        }
+
+        .advantages h2, .advantages h3 {
+            color: var(--bg-white);
+        }
+
+        .advantages .subtitle {
+            color: var(--accent-gold);
+        }
+
+        .advantages p {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .adv-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+            margin-top: 50px;
+        }
+
+        .adv-item {
+            text-align: left;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .adv-item h3 {
+            font-family: var(--font-body);
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .adv-item h3::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent-gold);
+            margin-right: 15px;
+            border-radius: 50%;
+        }
+
+        /* =========================================
+           8. PROCESS (Execution Logic)
+           ========================================= */
+        .process {
+            padding: var(--section-padding);
+            background-color: var(--bg-white);
+        }
+
+        .process-steps {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .process-steps::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #eee;
+            z-index: 0;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            padding: 0 20px;
+            min-width: 250px;
+        }
+
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--bg-white);
+            border: 2px solid var(--accent-gold);
+            color: var(--primary-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px auto;
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: var(--font-display);
+        }
+
+        /* =========================================
+           9. CONTACT SECTION
+           ========================================= */
+        .contact {
+            padding: var(--section-padding);
+            background-color: var(--bg-light);
+        }
+
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 60px;
+            background-color: var(--bg-white);
+            padding: 60px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        }
+
+        .contact-info {
+            padding-right: 40px;
+            border-right: 1px solid #eee;
+        }
+
+        .info-box {
+            margin-bottom: 30px;
+        }
+
+        .info-box h5 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            font-family: var(--font-body);
+        }
+
+        .info-box p {
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .contact-form form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            background-color: #fafafa;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            background-color: #fff;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        /* =========================================
+           10. FOOTER
+           ========================================= */
+        footer {
+            background-color: var(--primary-green);
+            color: rgba(255,255,255,0.7);
+            padding: 50px 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        footer p {
+            color: rgba(255,255,255,0.7);
+            margin: 0;
+        }
+
+        /* =========================================
+           RESPONSIVE
+           ========================================= */
+        @media (max-width: 900px) {
+            .hero h1 { font-size: 2.8rem; }
+            .about-grid, .contact-container { grid-template-columns: 1fr; }
+            .contact-info { border-right: none; padding-right: 0; margin-bottom: 40px; }
+            .adv-grid { grid-template-columns: 1fr; }
+            .process-steps::before { display: none; }
+            .step { margin-bottom: 40px; }
+            .nav-wrapper { flex-direction: column; height: auto; padding: 20px 0; }
+            nav ul { margin-top: 20px; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-wrapper">
+            <div class="logo">OAK <span>COMPUTER</span></div>
+            <nav>
+                <ul>
+                    <li><a href="#about">The Kernel</a></li>
+                    <li><a href="#services">Modules</a></li>
+                    <li><a href="#advantages">Stability</a></li>
+                    <li><a href="#process">Logic</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container hero-content">
+            <h1>Cultivating Robust <br>Digital Infrastructures.</h1>
+            <p>OAK Computer Architecture Consultoria Ltda engineers resilient computer architectures and management systems in Salvador. We blend technical precision with strategic foresight to ensure your technological roots run deep.</p>
+            <a href="#contact" class="btn btn-outline">Analyze Your Infrastructure</a>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container about-grid">
+            <div class="about-text">
+                <span class="subtitle">The Foundation</span>
+                <h2>Architecting Technology for Resilience</h2>
+                <p>Founded by Daniel Rodrigues Carvalho in Salvador, Bahia, OAK COMPUTER ARCHITECTURE CONSULTORIA LTDA operates on the principle that technology should be as enduring and robust as nature. We view computer systems not merely as hardware and software, but as living ecosystems that require precise design and expert management.</p>
+                <p>We specialize in the "Scientific and Technical Consulting" sector, focusing specifically on systems analysis and engineering consulting. Our approach moves beyond simple IT fixes; we analyze the fundamental architecture of your digital operations.</p>
+                <p>From designing complex server topologies to optimizing management workflows, our mission is to build systems that scale effortlessly. We serve businesses that cannot afford downtime, providing them with the structural integrity needed to grow without technical debt.</p>
+            </div>
+            <div class="about-img">
+                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Technology Architecture">
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="services">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="subtitle">System Modules</span>
+                <h2>Technical Capabilities</h2>
+            </div>
+
+            <div class="services-grid">
+                <div class="service-card">
+                    <span class="service-icon">&#9881;</span> <h3>Systems Analysis & Optimization</h3>
+                    <p>We perform deep-dive diagnostic audits of your current hardware and software interactions. Our goal is to identify bottlenecks at the architectural level and re-engineer workflows to maximize throughput and minimize latency.</p>
+                </div>
+
+                <div class="service-card">
+                    <span class="service-icon">&#9741;</span> <h3>Enterprise Architecture Consulting</h3>
+                    <p>Building a new digital environment? We design the blueprints. From on-premise server room layouts to hybrid cloud integration strategies, we ensure your physical and virtual infrastructure is built on solid ground.</p>
+                </div>
+
+                <div class="service-card">
+                    <span class="service-icon">&#128200;</span> <h3>Technical Management Strategy</h3>
+                    <p>We bridge the gap between engineering complexity and business goals. Our management consulting services help leadership teams understand technical risks, plan capacity upgrades, and align IT spend with long-term growth.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="advantages" class="advantages">
+        <div class="container">
+            <div class="text-center section-header">
+                <span class="subtitle">Core Stability</span>
+                <h2>Why Plant With OAK?</h2>
+            </div>
+
+            <div class="adv-grid">
+                <div class="adv-item">
+                    <h3>Rooted Expertise</h3>
+                    <p>Our methodology is grounded in rigorous scientific principles. We don't guess; we calculate. Under the guidance of Daniel Rodrigues Carvalho, every recommendation is backed by data analysis.</p>
+                </div>
+
+                <div class="adv-item">
+                    <h3>Resilient Design</h3>
+                    <p>Just like an oak tree withstands the storm, our architectures are built for redundancy and security. We prioritize stability above all else, ensuring your business continuity is preserved.</p>
+                </div>
+
+                <div class="adv-item">
+                    <h3>Strategic Growth</h3>
+                    <p>We design systems that are ready to branch out. Our scalable architectures allow you to add new modules, users, and capabilities without uprooting your existing foundation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="process" class="process">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="subtitle">Execution Logic</span>
+                <h2>Our Methodology</h2>
+            </div>
+
+            <div class="process-steps">
+                <div class="step">
+                    <div class="step-icon">01</div>
+                    <h3>Diagnostic Audit</h3>
+                    <p>We begin by mapping your current system roots. We identify inefficiencies, security gaps, and architectural weaknesses through a comprehensive technical audit.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-icon">02</div>
+                    <h3>Architectural Blueprinting</h3>
+                    <p>We design the solution. This involves creating detailed schematics, selecting the right technologies, and defining the management protocols for the new system.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-icon">03</div>
+                    <h3>Implementation & Pruning</h3>
+                    <p>We oversee the deployment of the new architecture, ensuring smooth integration. We then "prune" the system by removing obsolete processes to ensure optimal efficiency.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="subtitle">Input / Output</span>
+                <h2>Connect With The Architects</h2>
+            </div>
+
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="info-box">
+                        <h5>Headquarters</h5>
+                        <p>SALVADOR, BAHIA<br>Brazil</p>
+                    </div>
+
+                    <div class="info-box">
+                        <h5>Electronic Mail</h5>
+                        <p>info@oakcomputerarchitectureconsultoria.info</p>
+                    </div>
+
+                    <div class="info-box">
+                        <h5>Principal</h5>
+                        <p>Daniel Rodrigues Carvalho</p>
+                    </div>
+
+                    <div class="info-box">
+                        <h5>Industry</h5>
+                        <p>Computer Systems Design &<br>Technical Consulting Services</p>
+                    </div>
+                </div>
+
+                <div class="contact-form">
+                    <form action="#" method="POST">
+                        <div class="form-group">
+                            <input type="text" placeholder="Name" required>
+                            <input type="text" placeholder="Company">
+                        </div>
+                        <input type="email" placeholder="Email Address" required>
+                        <select>
+                            <option value="" disabled selected>System Interest</option>
+                            <option value="audit">System Audit</option>
+                            <option value="architecture">New Architecture Design</option>
+                            <option value="consulting">Management Consulting</option>
+                        </select>
+                        <textarea placeholder="Describe your infrastructure challenges..."></textarea>
+                        <button type="submit" class="btn">Initiate Analysis</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 OAK COMPUTER ARCHITECTURE CONSULTORIA LTDA. All Rights Reserved.</p>
+            <p style="margin-top: 10px; font-size: 0.8rem;">Systems Analysis | Engineering Consulting | Management Services</p>
+        </div>
+    </footer>
+
+</body>
+</html>
